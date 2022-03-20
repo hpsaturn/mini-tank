@@ -49,7 +49,7 @@ class MyTelemetryCallbacks : public EspNowTelemetryCallbacks{
         suspendCount = 0;
         heartBeatStamp = millis();
     };
-    void onError(){
+    void onError(const char* error){
     };
 };
 
@@ -122,6 +122,8 @@ void setup() {
     Disbuff.setTextColor(WHITE);
 }
 
+const uint8_t user1[6] = {0x3C, 0x61, 0x05, 0x0c, 0x93, 0xb8};
+
 void loop() {
     // auto power off if receiver is not connected
     if (!receiverConnected && suspendCount++ > 500) M5.Axp.PowerOff();  
@@ -151,4 +153,5 @@ void loop() {
     jm.ck = ck;
     joystick.sendJoystickMsg(jm);
     updateDisplay(ax, ay, az);
+    // delay(2000);
 }
