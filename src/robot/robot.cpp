@@ -35,7 +35,7 @@ void setSpeed(int16_t Vtx, int16_t Vty, int16_t Wt) {
     int turn = map(abs(Wt), 0, 100, 0, 130);
     
     // Serial.printf("[Vtx:%04d Vty:%04d Wt:%04d ]\n", Vtx, Vty, Wt);
-    Serial.println(debugCount++);
+    // Serial.println(debugCount++);
 
     int dir = (Wt>0) ? 0 : 1; // 0 left, 1 right
 
@@ -95,7 +95,7 @@ class MyJoystickCallback : public EspNowJoystickCallbacks {
         }
         sendHeartbeat();
     };
-    void onError(){
+    void onError(const char* msg) {
         setSpeed(0, 0, 0);
         Serial.println("Error");
     };
