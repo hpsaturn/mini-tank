@@ -1,24 +1,9 @@
-#include <WiFi.h>
-#include <WiFiUdp.h>
-#include <OTAHandler.h>
+#include <EspNowJoystick.hpp>
 #include <analogWrite.h>
-#include <pb_decode.h>
-#include <pb_encode.h>
 #include <ESP32MotorControl.h>
-#include "comm.pb.h"
+#include <ESP32Servo.h>
 
 #define BUILTINLED  19
-
-uint32_t count = 0;
-uint8_t IIC_ReState = I2C_ERROR_NO_BEGIN;
-
-const char *ssid = "ROBOTAP";
-const char *password = "77777777";
-
-WiFiServer server(80);
-WiFiUDP udp;
-uint8_t buffer[128];
-JoystickMessage jm = JoystickMessage_init_zero;
 
 #define MRIGHT 1
 #define MLEFT  0
@@ -27,25 +12,16 @@ JoystickMessage jm = JoystickMessage_init_zero;
 #define MIN2  25
 #define MIN3  22
 #define MIN4  21
+#define SRV1  4
+
+EspNowJoystick joystick;
+TelemetryMessage tm;
+Servo servo1;
+bool fire;
+bool running;
+uint32_t count = 0;
 
 ESP32MotorControl mc = ESP32MotorControl();
-
-bool decodeMessage(uint16_t message_length) {
-    /* This is the buffer where we will store our message. */
-
-    /* Create a stream that reads from the buffer. */
-    pb_istream_t stream = pb_istream_from_buffer(buffer, message_length);
-
-    /* Now we are ready to decode the message. */
-    bool status = pb_decode(&stream, JoystickMessage_fields, &jm);
-
-    /* Check for errors... */
-    if (!status) {
-        printf("Decoding failed: %s\n", PB_GET_ERROR(&stream));
-        return false;
-    }
-    return true;
-}
 
 void setSpeed(int16_t Vtx, int16_t Vty, int16_t Wt) {
     Wt = (Wt > 100) ? 100 : Wt;
@@ -60,7 +36,8 @@ void setSpeed(int16_t Vtx, int16_t Vty, int16_t Wt) {
     int speed = map(abs(Vty), 0, 100, 60, 200);
     int turn = map(abs(Wt), 0, 100, 0, 130);
     
-    Serial.printf("[Vtx:%04d Vty:%04d Wt:%04d ]\n", Vtx, Vty, Wt);
+    // Serial.printf("[Vtx:%04d Vty:%04d Wt:%04d ]\n", Vtx, Vty, Wt);
+    // Serial.println(debugCount++);
 
     int dir = (Wt>0) ? 0 : 1; // 0 left, 1 right
 
@@ -93,7 +70,7 @@ void setSpeed(int16_t Vtx, int16_t Vty, int16_t Wt) {
             mc.motorForward(MLEFT, speed);
             mc.motorReverse(MRIGHT, speed);
         }
-        analogWrite(BUILTINLED, turn);
+        analogWrite(BUILTINLED, abs(turn));
     }
     else {
         mc.motorsStop();
@@ -102,64 +79,76 @@ void setSpeed(int16_t Vtx, int16_t Vty, int16_t Wt) {
 
 }
 
-void otaLoop() {
-    if (WiFi.isConnected()) {
-        ota.loop();
+void sendHeartbeat() {
+    static uint_least32_t timeStamp = 0;
+    if (millis() - timeStamp > 500) {
+        timeStamp = millis();
+        tm.e1 = true;
+        joystick.sendTelemetryMsg(tm);
     }
 }
 
-void otaInit() {
-    ota.setup("AIROBOT", "AIROBOT");
-    // ota.setCallbacks(new MyOTAHandlerCallbacks());
+void checkFire() {
+    if (fire) {
+        Serial.println("Fire");
+        servo1.write(53);
+        fire = false;
+    }
+    else
+        servo1.write(70);
 }
+
+static uint_least32_t connectStamp = 0;
+
+void checkRunning() {
+    if (millis() - connectStamp > 100) {
+        running = false;
+        setSpeed(0, 0, 0);
+    }
+}
+
+class MyJoystickCallback : public EspNowJoystickCallbacks {
+    void onJoystickMsg(JoystickMessage jm){
+        // Serial.println("[Joystick]");
+        connectStamp = millis();
+        if (jm.ck == 0x02 && jm.bA == 1) {
+            fire = true;
+        }
+        if (jm.ck == 0x01) { 
+            setSpeed(jm.ax - 100, jm.ay - 100, jm.az - 100); 
+            running = true;
+        } 
+    };
+    void onError(const char* msg) {
+        setSpeed(0, 0, 0);
+        Serial.println("Error");
+    };
+};
+
 
 void setup() {
     Serial.begin(115200);
-    uint64_t chipid = ESP.getEfuseMac();
-    String str = ssid + String((uint32_t)(chipid >> 32), HEX);
-    //Set device in STA mode to begin with
-    WiFi.softAPConfig(IPAddress(192, 168, 4, 1),
-                      IPAddress(192, 168, 4, 1),
-                      IPAddress(255, 255, 255, 0));
+    delay(100);
 
-    WiFi.softAP(str.c_str(), password);
-    IPAddress myIP = WiFi.softAPIP();
-    Serial.print("AP IP address: ");
-    Serial.println(myIP);
-    server.begin();
-
-
-    otaInit();
-
-    udp.begin(1003);
-
-    analogWriteResolution(BUILTINLED, 12);   // builtin LED for TTGO-T7 v1.3 (see docs directory)
+    joystick.setJoystickCallbacks(new MyJoystickCallback());
+    tm = joystick.newTelemetryMsg();
+    joystick.init();
 
     mc.attachMotors(MIN1,MIN2,MIN3,MIN4);
+
+    // Allow allocation of all timers
+    ESP32PWM::allocateTimer(0);
+    ESP32PWM::allocateTimer(1);
+    ESP32PWM::allocateTimer(2);
+    ESP32PWM::allocateTimer(3);
+    servo1.setPeriodHertz(50);  // Standard 50hz servo
+    servo1.attach(SRV1,500,2400);
+    servo1.write(70);
 }
 
 void loop() {
-    int udplength = udp.parsePacket();
-    if (udplength) {
-        char udodata[udplength];
-        udp.read(udodata, udplength);
-        IPAddress udp_client = udp.remoteIP();
-        if ((udodata[0] == 0xAA) && (udodata[1] == 0x55) && (udodata[udplength - 1] == 0xee)) {
-            for (int i = 0; i < udplength-4; i++) {
-                buffer[i] = udodata[i+3];
-            }
-            decodeMessage(udplength-4);
-            if (jm.ck == 0x01) {
-                setSpeed(jm.ax - 100, jm.ay - 100, jm.az - 100);
-            } else {
-                setSpeed(0, 0, 0);
-            }
-        } else {
-            setSpeed(0, 0, 0);
-        }
-    }
-    else {
-        delay(10);
-    }
-    ota.loop();
+    checkFire(); 
+    checkRunning();
+    sendHeartbeat();
+    delay(5);
 }
