@@ -126,12 +126,18 @@ const uint8_t user1[6] = {0x3C, 0x61, 0x05, 0x0c, 0x93, 0xb8};
 
 void loop() {
     // auto power off if receiver is not connected
-    if (!receiverConnected && suspendCount++ > 500) M5.Axp.PowerOff();  
+    if (!receiverConnected && suspendCount++ > 500) M5.Axp.PowerOff();   
 
     if (M5.BtnA.read() == 1) {
-        if (btnPowerOffcount++ > 10) M5.Axp.PowerOff();
+        jm.bA = 1;
+        jm.ck = 0x02;
+        joystick.sendJoystickMsg(jm);
+        if (btnPowerOffcount++ > 20000) M5.Axp.PowerOff();
+        return;
     }
 
+    btnPowerOffcount = 0;
+    
     for (int i = 0; i < 4; i++) {
         AngleBuff[i] = I2CRead16bit(0x50 + i * 2);
     }
@@ -151,7 +157,7 @@ void loop() {
     jm.ax = ax;
     jm.az = az;
     jm.ck = ck;
-    joystick.sendJoystickMsg(jm);
+
     updateDisplay(ax, ay, az);
-    // delay(2000);
+    if(jm.ck != 0x00) joystick.sendJoystickMsg(jm);
 }
