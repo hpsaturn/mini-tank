@@ -1,11 +1,9 @@
 #include <EspNowJoystick.hpp>
 #include <analogWrite.h>
 #include <ESP32MotorControl.h>
+#include <ESP32Servo.h>
 
 #define BUILTINLED  19
-
-uint32_t count = 0;
-uint8_t IIC_ReState = I2C_ERROR_NO_BEGIN;
 
 #define MRIGHT 1
 #define MLEFT  0
@@ -14,12 +12,16 @@ uint8_t IIC_ReState = I2C_ERROR_NO_BEGIN;
 #define MIN2  25
 #define MIN3  22
 #define MIN4  21
+#define SRV1  4
 
 EspNowJoystick joystick;
 TelemetryMessage tm;
+Servo servo1;
+bool fire;
+bool running;
+uint32_t count = 0;
 
 ESP32MotorControl mc = ESP32MotorControl();
-static uint_least64_t debugCount = 0;
 
 void setSpeed(int16_t Vtx, int16_t Vty, int16_t Wt) {
     Wt = (Wt > 100) ? 100 : Wt;
@@ -86,20 +88,43 @@ void sendHeartbeat() {
     }
 }
 
+void checkFire() {
+    if (fire) {
+        Serial.println("Fire");
+        servo1.write(53);
+        fire = false;
+    }
+    else
+        servo1.write(70);
+}
+
+static uint_least32_t connectStamp = 0;
+
+void checkRunning() {
+    if (millis() - connectStamp > 100) {
+        running = false;
+        setSpeed(0, 0, 0);
+    }
+}
+
 class MyJoystickCallback : public EspNowJoystickCallbacks {
     void onJoystickMsg(JoystickMessage jm){
-        if (jm.ck == 0x01) {
-            setSpeed(jm.ax - 100, jm.ay - 100, jm.az - 100);
-        } else {
-            setSpeed(0, 0, 0);
+        // Serial.println("[Joystick]");
+        connectStamp = millis();
+        if (jm.ck == 0x02 && jm.bA == 1) {
+            fire = true;
         }
-        sendHeartbeat();
+        if (jm.ck == 0x01) { 
+            setSpeed(jm.ax - 100, jm.ay - 100, jm.az - 100); 
+            running = true;
+        } 
     };
     void onError(const char* msg) {
         setSpeed(0, 0, 0);
         Serial.println("Error");
     };
 };
+
 
 void setup() {
     Serial.begin(115200);
@@ -109,8 +134,21 @@ void setup() {
     tm = joystick.newTelemetryMsg();
     joystick.init();
 
-    analogWriteResolution(BUILTINLED, 12);   // builtin LED for TTGO-T7 v1.3 (see docs directory)
     mc.attachMotors(MIN1,MIN2,MIN3,MIN4);
+
+    // Allow allocation of all timers
+    ESP32PWM::allocateTimer(0);
+    ESP32PWM::allocateTimer(1);
+    ESP32PWM::allocateTimer(2);
+    ESP32PWM::allocateTimer(3);
+    servo1.setPeriodHertz(50);  // Standard 50hz servo
+    servo1.attach(SRV1,500,2400);
+    servo1.write(70);
 }
 
-void loop() {}
+void loop() {
+    checkFire(); 
+    checkRunning();
+    sendHeartbeat();
+    delay(5);
+}
