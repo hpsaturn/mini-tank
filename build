@@ -1,6 +1,6 @@
 #!/bin/bash
-
-export `cat platformio.ini | grep SRC_REV | awk '{print $2}'`
+SRV_VER=`cat platformio.ini | grep 'version =' | awk '{print $3}'`
+SRV_REV=`cat platformio.ini | grep 'revision =' | awk '{print $3}'`
 DATE=`date +%Y%m%d`
 OUTDIR=".pio/build"
 RELDIR="releases"
@@ -89,7 +89,13 @@ buildInstaller () {
 publish_release () {
   cd $INSDIR/..
   COMMIT_LOG=`git log -1 --format='%ci %H %s'`
-  github-release upload --owner hpsaturn --repo airobot --tag "rev${SRC_REV}" --release-name "rev${SRC_REV}" --body "${COMMIT_LOG}" airobot_rev${SRC_REV}_${DATE}.zip
+  tag="v${SRC_VER}"
+  rname="rev${SRC_REV}v${SRC_VER}"
+  echo "***********************************************"
+  echo "** Publishing release $tag ($rname)"
+  echo "***********************************************"
+  echo ""
+  github-release upload --owner hpsaturn --repo airobot --tag $tag --release-name $rname --body "${COMMIT_LOG}" airobot_rev${SRC_REV}_${DATE}.zip
 }
 
 printOutput () {
