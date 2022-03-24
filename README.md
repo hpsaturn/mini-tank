@@ -1,15 +1,21 @@
 # AIRobot
 
-ESP32 robot platform, the idea is join it with a [MaixPy RISC-V](https://maixpy.sipeed.com/en/) camera. For now the current development works with a M5StickC Joystick hat that controlling the robot via UDP using protobuf (nanopb). In the robot it use a simple ESP32 board.
+**! In development !**
+
+ESP32 robot platform, the idea is join it with a [MaixPy RISC-V](https://maixpy.sipeed.com/en/) camera. For now the current development works with a M5StickC Joystick hat that controlling the robot via ESPNow using protobuf (nanopb). In the robot it use a simple ESP32 board. Also the old version use UDP, this version right now is in a branch.
 
 ## TODO
 
 - [x] Platformio project (two sources)
-- [x] UDP channel settings in preferences lib
+- [x] UDP channel settings in preferences lib (old version)
 - [x] nanopb (protocol buffers implementation) for joystick messages
-- [x] separated OTA (joystick and robot)
-- [ ] MQTT channel ?
-- [ ] SPI connection to MaxiPy nano camera
+- [x] separated OTA (joystick and robot) (old version)
+- [x] ESPNow implementation isolated in a new library, [ESPNow Joystick](https://github.com/hpsaturn/espnow-joystick)
+- [x] Added in joystick a main button action for "fire"
+- [x] Added basic servo implementation with timers
+- [x] Added telemetry feedback from robot to joystick
+- [ ] OTA update over ESPNow version (master)
+- [ ] SPI or I2C connection to MaxiPy nano camera
 - [ ] Push AI models via proto
 - [ ] Auto navegation
 - [ ] Seek and destroy objects
@@ -19,14 +25,12 @@ ESP32 robot platform, the idea is join it with a [MaixPy RISC-V](https://maixpy.
 You can build it with Arduino IDE renaming the main files to .ino, but it is more easy if you use PlatformIO, with a simple command you upload both, Joystick and Robot. Connect first the robot board and then the joystick to the USB of your computer and run:
 
 ```bash
-pio run --target upload
+pio run -e robot --target upload
+pio run -e joystick --target upload
 ```
 
 Please check the right USB ports on `platformio.ini` file.
 
-### OTA (WiFi update)
-
-After the first upload to both boards, you could comment the robot and joystick `default_envs` definition in platformio.ini and uncomment the OTA defaults line for upload via WiFi without USB. Also with VisualCode IDE, you can choose these default envs in the botom tool bar.
 
 ## Usage
 
