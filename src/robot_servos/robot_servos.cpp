@@ -2,7 +2,7 @@
 #include <analogWrite.h>
 #include <ESP32Servo.h>
 
-#define BUILTINLED  19
+#define BUILTINLED  22
 
 EspNowJoystick joystick;
 TelemetryMessage tm;
@@ -54,12 +54,12 @@ void setSpeed(int16_t Vtx, int16_t Vty, int16_t Wt) {
     }
     else if (abs(Vty) <= 2 && abs(Vty) >=0 && Wt !=0 ) {
         if(Wt>0) {
-            servoLeft.write(2*SERVO_STOP-SERVO_MAX);
-            servoRight.write(2*SERVO_STOP-SERVO_MAX);
+            servoLeft.write(SERVO_STOP-turnL);
+            servoRight.write(SERVO_STOP-turnL);
         }
         else {
-            servoRight.write(SERVO_MAX);
-            servoLeft.write(SERVO_MAX);
+            servoRight.write(SERVO_STOP+turnR);
+            servoLeft.write(SERVO_STOP+turnR);
         }
         analogWrite(BUILTINLED, abs(Wt));
     }
@@ -100,7 +100,7 @@ void checkRunning() {
 
 class MyJoystickCallback : public EspNowJoystickCallbacks {
     void onJoystickMsg(JoystickMessage jm){
-        Serial.println("[Joystick]");
+        // Serial.println("[Joystick]");
         connectStamp = millis();
         if (jm.ck == 0x02 && jm.bA == 1) {
             fire = true;
