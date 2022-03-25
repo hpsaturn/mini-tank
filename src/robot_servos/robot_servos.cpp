@@ -33,7 +33,7 @@ void setSpeed(int16_t Vtx, int16_t Vty, int16_t Wt) {
     int speedL = SERVO_STOP-(speedR-SERVO_STOP);
 
     
-    int turnR = map(abs(Wt), 0, 100, 0, SERVO_MAX-SERVO_STOP)-2;
+    int turnR = map(abs(Wt), 0, 100, 0, SERVO_MAX-SERVO_STOP);
     int turnL = turnR;
 
     if (Wt>0) turnR = 0;
@@ -41,9 +41,10 @@ void setSpeed(int16_t Vtx, int16_t Vty, int16_t Wt) {
     if (Wt==0) turnR = turnL = 0;
     
 
-    // Serial.printf("[Vtx:%04d Vty:%04d Wt:%04d]\n", Vtx, Vty, Wt);
 
     if (Vty > 2) {
+        // Serial.printf("[Vtx:%04d Vty:%04d Wt:%04d]\n", Vtx, Vty, Wt);
+        Serial.printf("[spdR:%04d spdL:%04d turnR:%04d turnL:%04d]\n", speedR, speedL, turnR, turnL);
         servoLeft.write(speedR + turnR);
         servoRight.write(speedL - turnL);
         analogWrite(BUILTINLED, abs(Vty));
@@ -132,7 +133,7 @@ void setup() {
     ESP32PWM::allocateTimer(3);
     servoLeft.setPeriodHertz(50);  // Standard 50hz servo
     servoLeft.attach(servoLeftPin,500,2400);
-    servoRight.setPeriodHertz(50);  // Standard 50hz servo
+    servoRight.setPeriodHertz(300);  // Standard 50hz servo
     servoRight.attach(servoRightPin,500,2400);
 }
 
