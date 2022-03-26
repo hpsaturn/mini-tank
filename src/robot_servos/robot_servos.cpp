@@ -18,7 +18,6 @@ uint32_t count = 0;
 #define SERVO_STOP 101
 #define SERVO_MAX  116
 
-
 void setSpeed(int16_t Vtx, int16_t Vty, int16_t Wt) {
     Wt = (Wt > 100) ? 100 : Wt;
     Wt = (Wt < -100) ? -100 : Wt;
@@ -31,36 +30,34 @@ void setSpeed(int16_t Vtx, int16_t Vty, int16_t Wt) {
 
     int speedR = map(abs(Vty), 0, 100, SERVO_STOP, SERVO_MAX);
     int speedL = SERVO_STOP-(speedR-SERVO_STOP);
-
     
-    int turnR = map(abs(Wt), 0, 100, 0, SERVO_MAX-SERVO_STOP);
-    int turnL = turnR;
+    int dirL = map(abs(Wt), 0, 100, 0, SERVO_MAX-SERVO_STOP);
+    int dirR = dirL;
 
-    if (Wt>0) turnR = 0;
-    if (Wt<0) turnL = 0;
-    if (Wt==0) turnR = turnL = 0;
+    if (Wt>0) dirL = 0;
+    if (Wt<0) dirR = 0;
+    if (Wt==0) dirL = dirR = 0;
     
-
 
     if (Vty > 2) {
         // Serial.printf("[Vtx:%04d Vty:%04d Wt:%04d]\n", Vtx, Vty, Wt);
-        Serial.printf("[spdR:%04d spdL:%04d turnR:%04d turnL:%04d]\n", speedR, speedL, turnR, turnL);
-        servoLeft.write(speedR + turnR);
-        servoRight.write(speedL - turnL);
+        // Serial.printf("[spdR:%04d spdL:%04d dirL:%04d dirR:%04d]\n", speedR, speedL, dirL, dirR);
+        servoLeft.write(speedR + dirL);
+        servoRight.write(speedL - dirR);
         analogWrite(BUILTINLED, abs(Vty));
     } else if (Vty < -2) {
-        servoLeft.write(speedL - turnL);
-        servoRight.write(speedR + turnR);
+        servoLeft.write(speedL - dirR);
+        servoRight.write(speedR + dirL);
         analogWrite(BUILTINLED, abs(Vty));
     }
     else if (abs(Vty) <= 2 && abs(Vty) >=0 && Wt !=0 ) {
         if(Wt>0) {
-            servoLeft.write(SERVO_STOP-turnL);
-            servoRight.write(SERVO_STOP-turnL);
+            servoLeft.write(SERVO_STOP-dirR);
+            servoRight.write(SERVO_STOP-dirR);
         }
         else {
-            servoRight.write(SERVO_STOP+turnR);
-            servoLeft.write(SERVO_STOP+turnR);
+            servoRight.write(SERVO_STOP+dirL);
+            servoLeft.write(SERVO_STOP+dirL);
         }
         analogWrite(BUILTINLED, abs(Wt));
     }
@@ -133,7 +130,7 @@ void setup() {
     ESP32PWM::allocateTimer(3);
     servoLeft.setPeriodHertz(50);  // Standard 50hz servo
     servoLeft.attach(servoLeftPin,500,2400);
-    servoRight.setPeriodHertz(300);  // Standard 50hz servo
+    servoRight.setPeriodHertz(50);  // Standard 50hz servo
     servoRight.attach(servoRightPin,500,2400);
 }
 

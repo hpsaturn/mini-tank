@@ -103,6 +103,7 @@ void setup() {
 
     M5.Lcd.setRotation(4);
     M5.Lcd.setSwapBytes(false);
+    M5.Axp.ScreenBreath(7);  // set brightness (range 7-11)
     Disbuff.createSprite(80, 160);
     Disbuff.setSwapBytes(true);
     Disbuff.fillRect(0, 0, 80, 20, Disbuff.color565(50, 50, 50));
@@ -116,13 +117,16 @@ void setup() {
 
     joystick.setTelemetryCallbacks(new MyTelemetryCallbacks());
     jm = joystick.newJoystickMsg();
-    joystick.init();
+    joystick.init();   // with true you can enable debug mode and see the macaddress of the target
 
     Disbuff.setTextSize(1);
     Disbuff.setTextColor(WHITE);
 }
 
-const uint8_t user1[6] = {0x3C, 0x61, 0x05, 0x0c, 0x93, 0xb8};
+// Possible targets:
+// const uint8_t ark1[6] = {0x3C, 0x61, 0x05, 0x0c, 0x93, 0xb8};
+// const uint8_t tankRed[6] = {0x3c,0x71,0xbf,0xf0,0xc6,0xa0};
+// const uint8_t tankLego[6] = {0xb4,0xe6,0x2d,0xe0,0x51,0x19};
 
 void loop() {
     // auto power off if receiver is not connected
@@ -159,5 +163,6 @@ void loop() {
     jm.ck = ck;
 
     updateDisplay(ax, ay, az);
+    // if(jm.ck != 0x00) joystick.sendJoystickMsg(jm,tankRed);
     if(jm.ck != 0x00) joystick.sendJoystickMsg(jm);
 }
