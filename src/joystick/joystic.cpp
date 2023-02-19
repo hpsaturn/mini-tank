@@ -163,6 +163,6 @@ void loop() {
     jm.ck = ck;
 
     updateDisplay(ax, ay, az);
-    // if(jm.ck != 0x00) joystick.sendJoystickMsg(jm,tankLego);
-    if(jm.ck != 0x00) joystick.sendJoystickMsg(jm);
+    if(jm.ck != 0x00) joystick.sendJoystickMsg(jm,tankLego);
+    // if(jm.ck != 0x00) joystick.sendJoystickMsg(jm);
 }
