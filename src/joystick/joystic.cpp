@@ -1,4 +1,4 @@
-#include <M5StickC.h>
+#include <M5StickCPlus.h>
 #include <EspNowJoystick.hpp>
 #include <ConfigApp.hpp>
 
@@ -126,7 +126,7 @@ void setup() {
 // Possible targets:
 // const uint8_t ark1[6] = {0x3C, 0x61, 0x05, 0x0c, 0x93, 0xb8};
 // const uint8_t tankRed[6] = {0x3c,0x71,0xbf,0xf0,0xc6,0xa0};
-const uint8_t tankLego[6] = {0xb4,0xe6,0x2d,0xe0,0x51,0x19};
+// const uint8_t tankLego[6] = {0xb4,0xe6,0x2d,0xe0,0x51,0x19};
 
 void loop() {
     // auto power off if receiver is not connected
@@ -163,6 +163,6 @@ void loop() {
     jm.ck = ck;
 
     updateDisplay(ax, ay, az);
-    if(jm.ck != 0x00) joystick.sendJoystickMsg(jm,tankLego);
-    // if(jm.ck != 0x00) joystick.sendJoystickMsg(jm);
+    // if(jm.ck != 0x00) joystick.sendJoystickMsg(jm,tankLego);
+    if(jm.ck != 0x00) joystick.sendJoystickMsg(jm);
 }
