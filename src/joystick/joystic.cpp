@@ -1,4 +1,10 @@
+
+#ifdef M5STICKC
+#include <M5StickC.h>
+#else
 #include <M5StickCPlus.h>
+#endif
+
 #include <EspNowJoystick.hpp>
 #include <ConfigApp.hpp>
 
