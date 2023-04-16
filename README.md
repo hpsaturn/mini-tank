@@ -33,4 +33,4 @@ pio run -e joystickM5StickCPlus --target upload
 
 For 3DPrint files, build instructions and components details [here](https://sites.google.com/view/robot-mini-tanque/inicio)
 
-[![Youtube demo](images/youtube_preview.jpg))](https://youtu.be/I6cGg1o1NR0 "Joystick WiFi using nanopb (protobuff) over a ESP32 caterpillar")
+[![Youtube demo](images/youtube_preview.jpg)](https://youtu.be/I6cGg1o1NR0 "Joystick WiFi using nanopb (protobuff) over a ESP32 caterpillar")
