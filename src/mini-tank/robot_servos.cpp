@@ -110,16 +110,6 @@ void sendHeartbeat() {
   }
 }
 
-void checkFire() {
-  if (fire) {
-    Serial.println("Fire");
-    // servo1.write(53);
-    fire = false;
-  }
-  // else
-  // servo1.write(70);
-}
-
 static uint_least32_t connectStamp = 0;
 
 void checkRunning() {
@@ -174,7 +164,6 @@ void setup() {
 }
 
 void loop() {
-  checkFire();
   checkRunning();
   sendHeartbeat();
   displayEmoticon(lastVty);

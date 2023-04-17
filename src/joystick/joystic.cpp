@@ -109,7 +109,7 @@ void setup() {
 
     M5.Lcd.setRotation(4);
     M5.Lcd.setSwapBytes(false);
-    M5.Axp.ScreenBreath(8);  // set brightness (range 7-11)
+    M5.Axp.ScreenBreath(9);  // set brightness (range 7-11)
     Disbuff.createSprite(80, 160);
     Disbuff.setSwapBytes(true);
     Disbuff.fillRect(0, 0, 80, 20, Disbuff.color565(50, 50, 50));
