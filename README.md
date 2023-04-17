@@ -1,7 +1,7 @@
 
 ## Mini Tank
 
-ESP32/8266 robot platform using two basic servos. 
+ESP32/8266 robot platform using two basic servos.
 
 ## Credits
 
@@ -19,6 +19,18 @@ ESP32/8266 robot platform using two basic servos.
 - [ ] SPI or I2C connection to MaxiPy nano camera
 - [ ] OTA update in boot
 
+## Wiring
+
+The robot in the video has the next alternartive componentes:
+
+- [ ] TTGO T7 ESP32 Board (is possible Wemos ESP8266, see below)
+- [ ] D1 Mini proto PCB (for wire connections and connectors)
+- [ ] D1 Mini OLED shield (optional)
+- [ ] Two small servos (SG90 or compatible modified to 360¤)
+- [ ] LIPO battery of 3.7v
+
+The pins used to connect the servos are: 16,17.
+
 ## Firmware
 
 You can build and upload it using PlatformIO, with a simple command you upload both, Joysticks and Robot. Connect first the robot board and then the joystick to the USB of your computer and run:
@@ -29,7 +41,7 @@ pio run -e joystickM5StickC --target upload
 pio run -e joystickM5StickCPlus --target upload
 ```
 
-## Components
+## 3D Printing
 
 For 3DPrint files, build instructions and components details [here](https://sites.google.com/view/robot-mini-tanque/inicio)
 
