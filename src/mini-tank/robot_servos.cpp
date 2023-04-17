@@ -1,7 +1,11 @@
 #include <EspNowJoystick.hpp>
+#ifdef ESP8266
+#include <Servo.h>
+#else
 #include <ESP32Servo.h>
-#include <U8g2lib.h>
 #include <analogWrite.h>
+#endif
+#include <U8g2lib.h>
 #include "GUI.h"
 
 #define BUILTINLED 22
@@ -95,7 +99,9 @@ void setSpeed(int16_t Vtx, int16_t Vty, int16_t Wt) {
   // GUI Variables
   if(lastVty!=0) lastVty = Vty; 
   if(Vty!=0) lastVty = Vty;
+  #ifndef ESP8266
   analogWrite(BUILTINLED, abs(Vty));
+  #endif
   // Debugging
   if (spdL !=degreesCenterL || spdR != degreesCenterR)
     Serial.printf("[spdR:%04d spdL:%04d]\r\n", spdR, spdL);
