@@ -15,9 +15,9 @@ ESP32/8266 robot platform using two basic servos.
 - [x] Basic emoticons handling
 - [x] ESPNow implementation using the [ESPNow Joystick](https://github.com/hpsaturn/espnow-joystick) library
 - [x] Servo control improvements. Thanks to [@acicuecalo](https://github.com/acicuecalo)
-- [ ] Battery level
-- [ ] SPI or I2C connection to MaxiPy nano camera
 - [ ] OTA update in boot
+- [ ] Battery level
+- [ ] SPI or I2C connection to MaxiPy nano camera ?
 
 ## Wiring
 
@@ -28,6 +28,8 @@ The robot in the video has the next alternartive componentes:
 - [ ] D1 Mini OLED shield (optional)
 - [ ] Two small servos (SG90 or compatible modified to 360¤)
 - [ ] LIPO battery of 3.7v
+- [ ] Two M3/M2 screws (also with servo screw maybe works)
+- [ ] Two Rubber O-Rings Seal 35mm OD 31mm ID 2mm Width
 
 The pins used to connect the servos are: 16,17.
 
