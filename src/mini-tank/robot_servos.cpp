@@ -17,19 +17,21 @@ int servoRightPin = 27;
 bool running, fire;
 uint32_t count = 0;
 
-const int spanLeft = 50;
-const int offsetLeft = 0;
+const int spanLeft = 60;
+const int offsetMinLeft = 15;
+const int offsetMaxLeft = 0;
 const int degreesCenterL = 100;
-const int degreesMinL = degreesCenterL - spanLeft + offsetLeft;
-const int degreesMaxL = degreesCenterL + spanLeft + offsetLeft;
+const int degreesMinL = degreesCenterL - spanLeft;
+const int degreesMaxL = degreesCenterL + spanLeft;
 
-const int deathBand = 10;
+const int deathBand = 5;
 
-const int spanRight = 50;
-const int offsetRight = 0;
+const int spanRight = 60;
+const int offsetMinRight = 15;
+const int offsetMaxRight = 0;
 const int degreesCenterR = 100;
-const int degreesMinR = degreesCenterR - spanRight + offsetRight;
-const int degreesMaxR = degreesCenterR + spanRight + offsetRight;
+const int degreesMinR = degreesCenterR - spanRight;
+const int degreesMaxR = degreesCenterR + spanRight;
 
 int lastVty = 0;
 
@@ -72,8 +74,8 @@ void setSpeed(int16_t Vtx, int16_t Vty, int16_t Wt) {
   }
  
   // Mixer
-  spdL = Vty + Vtx;   //motorDelanteroIzquierdo
-  spdR = -Vty + Vtx;  //motorDelanteroDerecho
+  spdL = Vty + Vtx;   //motorL
+  spdR = -Vty + Vtx;  //motorR
 
   // Servo output
   spdL = map(spdL, -100, 100, degreesMinL, degreesMaxL);
@@ -81,6 +83,8 @@ void setSpeed(int16_t Vtx, int16_t Vty, int16_t Wt) {
    
   if (spdL != degreesCenterL) {
     attachServoLeft();
+    if (spdL > degreesCenterL) spdL = spdL + offsetMaxLeft;
+    else spdL = spdL - offsetMinLeft;
     servoLeft.write(spdL);
   } else {
     servoLeft.detach();
@@ -88,6 +92,8 @@ void setSpeed(int16_t Vtx, int16_t Vty, int16_t Wt) {
 
   if (spdR != degreesCenterR) {
     attachServoRight();
+    if (spdR > degreesCenterR) spdR = spdR + offsetMaxRight;
+    else spdR = spdR - offsetMinRight;
     servoRight.write(spdR);
   } else {
     servoRight.detach();
@@ -97,7 +103,7 @@ void setSpeed(int16_t Vtx, int16_t Vty, int16_t Wt) {
   if(Vty!=0) lastVty = Vty;
   analogWrite(BUILTINLED, abs(Vty));
   // Debugging
-  if (spdL !=degreesCenterL || spdR != degreesCenterR)
+  // if (spdL !=degreesCenterL || spdR != degreesCenterR)
     Serial.printf("[spdR:%04d spdL:%04d]\r\n", spdR, spdL);
 }
 
