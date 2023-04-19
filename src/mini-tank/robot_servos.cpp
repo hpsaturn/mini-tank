@@ -11,23 +11,23 @@ TelemetryMessage tm;
 
 Servo servoLeft;
 Servo servoRight;
-int servoLeftPin = 16;
-int servoRightPin = 17;
+int servoLeftPin = 25;
+int servoRightPin = 27;
 
 bool running, fire;
 uint32_t count = 0;
 
-const int spanLeft = 20;
+const int spanLeft = 50;
 const int offsetLeft = 0;
-const int degreesCenterL = 96;
+const int degreesCenterL = 100;
 const int degreesMinL = degreesCenterL - spanLeft + offsetLeft;
 const int degreesMaxL = degreesCenterL + spanLeft + offsetLeft;
 
 const int deathBand = 10;
 
-const int spanRight = 20;
-const int offsetRight = -3;
-const int degreesCenterR = 101;
+const int spanRight = 50;
+const int offsetRight = 0;
+const int degreesCenterR = 100;
 const int degreesMinR = degreesCenterR - spanRight + offsetRight;
 const int degreesMaxR = degreesCenterR + spanRight + offsetRight;
 
