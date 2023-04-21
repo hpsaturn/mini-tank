@@ -21,7 +21,7 @@ ESP32/8266 robot platform using two basic servos.
 
 ## Wiring
 
-The robot in the video has the next alternartive componentes:
+The robot in the video has the next alternartive components:
 
 - [ ] TTGO T7 ESP32 Board (is possible Wemos ESP8266, see below)
 - [ ] D1 Mini proto PCB (for wire connections and connectors)
