@@ -11,8 +11,8 @@ TelemetryMessage tm;
 
 Servo servoLeft;
 Servo servoRight;
-int servoLeftPin = 27;
-int servoRightPin = 25;
+int servoLeftPin = 25;
+int servoRightPin = 27;
 
 bool running, fire;
 uint32_t count = 0;
@@ -21,8 +21,8 @@ const int spanLeft = 60;
 const int offsetMinLeft = 12;
 const int offsetMaxLeft = -12;
 const int degreesCenterL = 100;
-const int degreesMinL = degreesCenterL - spanLeft;
-const int degreesMaxL = degreesCenterL + spanLeft;
+const int degreesMinL = degreesCenterL + spanLeft;
+const int degreesMaxL = degreesCenterL - spanLeft;
 
 const int deathBand = 5;
 
@@ -30,8 +30,8 @@ const int spanRight = 60;
 const int offsetMinRight = 9;
 const int offsetMaxRight = -10;
 const int degreesCenterR = 100;
-const int degreesMinR = degreesCenterR - spanRight;
-const int degreesMaxR = degreesCenterR + spanRight;
+const int degreesMinR = degreesCenterR + spanRight;
+const int degreesMaxR = degreesCenterR - spanRight;
 
 int lastVty = 0;
 
@@ -104,7 +104,7 @@ void setSpeed(int16_t Vtx, int16_t Vty, int16_t Wt) {
   analogWrite(BUILTINLED, abs(Vty));
   // Debugging
   // if (spdL !=degreesCenterL || spdR != degreesCenterR)
-    Serial.printf("[spdR:%04d spdL:%04d]\r\n", spdR, spdL);
+  // Serial.printf("[spdR:%04d spdL:%04d]\r\n", spdR, spdL);
 }
 
 void sendHeartbeat() {
@@ -154,6 +154,7 @@ void setup() {
   showWelcome();
   joystick.setJoystickCallbacks(new MyJoystickCallback());
   tm = joystick.newTelemetryMsg();
+  joystick.devmode = true;
   joystick.init();
   showWelcomeMessage("ESPNow ready");
 

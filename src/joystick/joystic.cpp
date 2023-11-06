@@ -133,6 +133,8 @@ void setup() {
 // const uint8_t ark1[6] = {0x3C, 0x61, 0x05, 0x0c, 0x93, 0xb8};
 // const uint8_t tankRed[6] = {0x3c,0x71,0xbf,0xf0,0xc6,0xa0};
 // const uint8_t tankLego[6] = {0xb4,0xe6,0x2d,0xe0,0x51,0x19};
+// 80:7D:3A:C5:65:F4
+const uint8_t tank_mg995_black[6] = {0x80,0x7D,0x3A,0xC5,0x65,0xf4};
 
 void loop() {
     // auto power off if receiver is not connected
@@ -169,6 +171,8 @@ void loop() {
     jm.ck = ck;
 
     updateDisplay(ax, ay, az);
-    // if(jm.ck != 0x00) joystick.sendJoystickMsg(jm,tankLego);
-    if(jm.ck != 0x00) joystick.sendJoystickMsg(jm);
+    if(jm.ck != 0x00) joystick.sendJoystickMsg(jm,tank_mg995_black);
+    // if(jm.ck != 0x00) joystick.sendJoystickMsg(jm);
+    
+    delay(5);
 }
