@@ -177,7 +177,7 @@ void setup() {
 
 void loop() {
   // auto power off if receiver is not connected
-  if (!receiverConnected && suspendCount++ > 2000) {
+  if (!receiverConnected && suspendCount++ > 3500) {
     Serial.println("not receiver detected. Turn off..");
     Serial.println("Releasing receivers:");
     joystick.printReceivers();
