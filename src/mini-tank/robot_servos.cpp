@@ -1,18 +1,17 @@
 #include <EspNowJoystick.hpp>
 #include <ESP32Servo.h>
-#include <U8g2lib.h>
 #include <analogWrite.h>
 #include "GUI.h"
 
-#define BUILTINLED 22
+#define BUILTINLED 21
 
 EspNowJoystick joystick;
 TelemetryMessage tm;
 
 Servo servoLeft;
 Servo servoRight;
-int servoLeftPin = 27;
-int servoRightPin = 25;
+int servoLeftPin = 2;
+int servoRightPin = 4;
 
 bool running, fire;
 uint32_t count = 0;
@@ -21,8 +20,8 @@ const int spanLeft = -60;
 const int offsetMinLeft = 9;
 const int offsetMaxLeft = -5;
 const int degreesCenterL = 100;
-const int degreesMinL = degreesCenterL + spanLeft;
-const int degreesMaxL = degreesCenterL - spanLeft;
+const int degreesMinL = degreesCenterL - spanLeft;
+const int degreesMaxL = degreesCenterL + spanLeft;
 
 const int deathBand = 10;
 
@@ -30,22 +29,42 @@ const int spanRight = -60;
 const int offsetMinRight = 10;
 const int offsetMaxRight = -7;
 const int degreesCenterR = 100;
-const int degreesMinR = degreesCenterR + spanRight;
-const int degreesMaxR = degreesCenterR - spanRight;
+const int degreesMinR = degreesCenterR - spanRight;
+const int degreesMaxR = degreesCenterR + spanRight;
 
 int lastVty = 0;
 
+ESP32PWM pwm;
+
+void attachPWM () {
+  #if defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32C3)
+	pwm.attachPin(37, 10000);//10khz
+#elif defined(CONFIG_IDF_TARGET_ESP32C3)
+	pwm.attachPin(7, 10000);//10khz
+#else
+	pwm.attachPin(27, 10000);//10khz
+#endif
+}
+
 void attachServoLeft() {
-  if (!servoLeft.attached()) servoLeft.attach(servoLeftPin);
+  if (!servoLeft.attached()) {
+    servoLeft.attach(servoLeftPin);
+    // attachPWM();
+  }
 }
 
 void attachServoRight() {
-  if (!servoRight.attached()) servoRight.attach(servoRightPin);
+  if (!servoRight.attached()) {
+    Serial.printf("attached right pin %i\r\n", servoRightPin);
+    servoRight.attach(servoRightPin);
+    // attachPWM();
+  } 
 }
 
 void detachServos() {
   servoLeft.detach();
   servoRight.detach();
+  // pwm.detachPin(27);
 }
 
 /**
@@ -94,17 +113,23 @@ void setSpeed(int16_t Vtx, int16_t Vty, int16_t Wt) {
     attachServoRight();
     if (spdR > degreesCenterR) spdR = spdR + offsetMaxRight;
     else spdR = spdR - offsetMinRight;
+    Serial.printf("servo Right write [spdR:%04d spdL:%04d]\r\n", spdR, spdL);
     servoRight.write(spdR);
-  } else {
+  } else if (servoRight.attached()) {
+    servoRight.write(degreesCenterR);
     servoRight.detach();
+    pwm.detachPin(27);
+    Serial.printf("dettached right pin %i\r\n", servoRightPin);
   }
+
   // GUI Variables
   if(lastVty!=0) lastVty = Vty; 
   if(Vty!=0) lastVty = Vty;
   analogWrite(BUILTINLED, abs(Vty));
   // Debugging
-  if (spdL !=degreesCenterL || spdR != degreesCenterR)
-    Serial.printf("[spdR:%04d spdL:%04d]\r\n", spdR, spdL);
+  // if (spdL !=degreesCenterL || spdR != degreesCenterR) {
+    // Serial.printf("[spdR:%04d spdL:%04d]\r\n", spdR, spdL);
+  // }
 }
 
 void sendHeartbeat() {
@@ -150,13 +175,13 @@ class MyJoystickCallback : public EspNowJoystickCallbacks {
 void setup() {
   Serial.begin(115200);
   delay(100);
-  displayInit();
-  showWelcome();
+  // displayInit();
+  // showWelcome();
   joystick.setJoystickCallbacks(new MyJoystickCallback());
   tm = joystick.newTelemetryMsg();
   joystick.devmode = true;
   joystick.init();
-  showWelcomeMessage("ESPNow ready");
+  // showWelcomeMessage("ESPNow ready");
 
   // Allow allocation of all timers
   ESP32PWM::allocateTimer(0);
@@ -165,14 +190,14 @@ void setup() {
   ESP32PWM::allocateTimer(3);
   attachServoLeft();
   attachServoRight();
-  showWelcomeMessage("Servos ready");
+  // showWelcomeMessage("Servos ready");
   delay(500);
-  showWelcomeMessage("== SETUP READY ==");
+  // showWelcomeMessage("== SETUP READY ==");
 }
 
 void loop() {
   checkRunning();
   sendHeartbeat();
-  displayEmoticon(lastVty);
+  // displayEmoticon(lastVty);
   delay(20);
 }
