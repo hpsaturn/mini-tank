@@ -102,4 +102,9 @@ void displayInit() {
   dh = u8g2.getDisplayHeight();
   Serial.println("-->[OGUI] display config ready.");
 }
+#else
+void displayInit(){}
+void displayEmoticon(int speed) {}
+void showWelcome() {}
+void showWelcomeMessage(String msg) {}
 #endif

@@ -3,37 +3,33 @@
 #include <analogWrite.h>
 #include "GUI.h"
 
-#define BUILTINLED 21
-
 EspNowJoystick joystick;
 TelemetryMessage tm;
 
 Servo servoLeft;
 Servo servoRight;
-int servoLeftPin = 2;
-int servoRightPin = 4;
+int servoLeftPin = SERVO_LEFT_PIN;
+int servoRightPin = SERVO_RIGHT_PIN;
 
-bool running, fire;
-uint32_t count = 0;
+const int spanLeft = SPAN_LEFT;
+const int offsetMinLeft = OFFSET_MIN_LEFT;
+const int offsetMaxLeft = OFFSET_MAX_LEFT;
+const int degreesCenterL = CENTER_LEFT;
+const int degreesMinL = degreesCenterL + spanLeft;
+const int degreesMaxL = degreesCenterL - spanLeft;
 
-const int spanLeft = -60;
-const int offsetMinLeft = 9;
-const int offsetMaxLeft = -5;
-const int degreesCenterL = 100;
-const int degreesMinL = degreesCenterL - spanLeft;
-const int degreesMaxL = degreesCenterL + spanLeft;
+const int deathBand = DEATH_BAND;
 
-const int deathBand = 10;
-
-const int spanRight = -60;
-const int offsetMinRight = 10;
-const int offsetMaxRight = -7;
-const int degreesCenterR = 100;
+const int spanRight = SPAN_RIGHT;
+const int offsetMinRight = OFFSET_MIN_RIGHT;
+const int offsetMaxRight = OFFSET_MAX_RIGHT;
+const int degreesCenterR = CENTER_RIGHT;
 const int degreesMinR = degreesCenterR - spanRight;
 const int degreesMaxR = degreesCenterR + spanRight;
 
+bool running, fire;
+uint32_t count = 0;
 int lastVty = 0;
-
 ESP32PWM pwm;
 
 void attachPWM () {
@@ -175,13 +171,13 @@ class MyJoystickCallback : public EspNowJoystickCallbacks {
 void setup() {
   Serial.begin(115200);
   delay(100);
-  // displayInit();
-  // showWelcome();
+  displayInit();
+  showWelcome();
   joystick.setJoystickCallbacks(new MyJoystickCallback());
   tm = joystick.newTelemetryMsg();
   joystick.devmode = true;
   joystick.init();
-  // showWelcomeMessage("ESPNow ready");
+  showWelcomeMessage("ESPNow ready");
 
   // Allow allocation of all timers
   ESP32PWM::allocateTimer(0);
@@ -190,14 +186,14 @@ void setup() {
   ESP32PWM::allocateTimer(3);
   attachServoLeft();
   attachServoRight();
-  // showWelcomeMessage("Servos ready");
+  showWelcomeMessage("Servos ready");
   delay(500);
-  // showWelcomeMessage("== SETUP READY ==");
+  showWelcomeMessage("== SETUP READY ==");
 }
 
 void loop() {
   checkRunning();
   sendHeartbeat();
-  // displayEmoticon(lastVty);
+  displayEmoticon(lastVty);
   delay(20);
 }
