@@ -15,8 +15,13 @@ const int spanLeft = SPAN_LEFT;
 const int offsetMinLeft = OFFSET_MIN_LEFT;
 const int offsetMaxLeft = OFFSET_MAX_LEFT;
 const int degreesCenterL = CENTER_LEFT;
+#ifndef SERVO_INVERTED
 const int degreesMinL = degreesCenterL + spanLeft;
 const int degreesMaxL = degreesCenterL - spanLeft;
+#else
+const int degreesMinL = degreesCenterL - spanLeft;
+const int degreesMaxL = degreesCenterL + spanLeft;
+#endif
 
 const int deathBand = DEATH_BAND;
 
@@ -24,8 +29,13 @@ const int spanRight = SPAN_RIGHT;
 const int offsetMinRight = OFFSET_MIN_RIGHT;
 const int offsetMaxRight = OFFSET_MAX_RIGHT;
 const int degreesCenterR = CENTER_RIGHT;
+#ifndef SERVO_INVERTED
+const int degreesMinR = degreesCenterR + spanRight;
+const int degreesMaxR = degreesCenterR - spanRight;
+#else
 const int degreesMinR = degreesCenterR - spanRight;
 const int degreesMaxR = degreesCenterR + spanRight;
+#endif
 
 bool running, fire;
 uint32_t count = 0;
