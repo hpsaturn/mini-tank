@@ -40,5 +40,4 @@
 *.swp
 
 .vscode
-releases/binaries/
-releases/installer/
+releases
