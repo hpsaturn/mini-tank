@@ -1,3 +1,5 @@
+#ifdef MINI_TANK
+#include <U8g2lib.h>
 #include "GUIIcons.h"
 
 U8G2_SSD1306_64X48_ER_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE, U8X8_PIN_NONE, U8X8_PIN_NONE);
@@ -100,3 +102,9 @@ void displayInit() {
   dh = u8g2.getDisplayHeight();
   Serial.println("-->[OGUI] display config ready.");
 }
+#else
+void displayInit(){}
+void displayEmoticon(int speed) {}
+void showWelcome() {}
+void showWelcomeMessage(String msg) {}
+#endif

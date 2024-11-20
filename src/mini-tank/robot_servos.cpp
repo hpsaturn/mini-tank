@@ -1,50 +1,69 @@
 #include <EspNowJoystick.hpp>
 #include <ESP32Servo.h>
-#include <U8g2lib.h>
 #include <analogWrite.h>
 #include "GUI.h"
-
-#define BUILTINLED 22
+#include "peripherals.h"
 
 EspNowJoystick joystick;
 TelemetryMessage tm;
 
 Servo servoLeft;
 Servo servoRight;
-int servoLeftPin = 16;
-int servoRightPin = 17;
+int servoLeftPin = SERVO_LEFT_PIN;
+int servoRightPin = SERVO_RIGHT_PIN;
+
+const int spanLeft = SPAN_LEFT;
+const int offsetMinLeft = OFFSET_MIN_LEFT;
+const int offsetMaxLeft = OFFSET_MAX_LEFT;
+const int degreesCenterL = CENTER_LEFT;
+#ifndef SERVO_INVERTED
+const int degreesMinL = degreesCenterL + spanLeft;
+const int degreesMaxL = degreesCenterL - spanLeft;
+#else
+const int degreesMinL = degreesCenterL - spanLeft;
+const int degreesMaxL = degreesCenterL + spanLeft;
+#endif
+
+const int deathBand = DEATH_BAND;
+
+const int spanRight = SPAN_RIGHT;
+const int offsetMinRight = OFFSET_MIN_RIGHT;
+const int offsetMaxRight = OFFSET_MAX_RIGHT;
+const int degreesCenterR = CENTER_RIGHT;
+#ifndef SERVO_INVERTED
+const int degreesMinR = degreesCenterR + spanRight;
+const int degreesMaxR = degreesCenterR - spanRight;
+#else
+const int degreesMinR = degreesCenterR - spanRight;
+const int degreesMaxR = degreesCenterR + spanRight;
+#endif
 
 bool running, fire;
 uint32_t count = 0;
-
-const int spanLeft = 20;
-const int offsetLeft = 0;
-const int degreesCenterL = 96;
-const int degreesMinL = degreesCenterL - spanLeft + offsetLeft;
-const int degreesMaxL = degreesCenterL + spanLeft + offsetLeft;
-
-const int deathBand = 10;
-
-const int spanRight = 20;
-const int offsetRight = -3;
-const int degreesCenterR = 101;
-const int degreesMinR = degreesCenterR - spanRight + offsetRight;
-const int degreesMaxR = degreesCenterR + spanRight + offsetRight;
-
 int lastVty = 0;
 
+bool camera_toggle = false;
+bool led_lamp_toggle = false;
+
 void attachServoLeft() {
-  if (!servoLeft.attached()) servoLeft.attach(servoLeftPin);
+  if (!servoLeft.attached()) {
+    servoLeft.attach(servoLeftPin);
+  }
 }
 
 void attachServoRight() {
-  if (!servoRight.attached()) servoRight.attach(servoRightPin);
+  if (!servoRight.attached()) {
+    servoRight.attach(servoRightPin);
+  } 
 }
 
 void detachServos() {
   servoLeft.detach();
   servoRight.detach();
 }
+
+
+
 
 /**
  * @param Vtx Joystick left stick, X axis (Left/Right)
@@ -58,10 +77,10 @@ void detachServos() {
  * the code @acicuecalo for Arduino IDE:
  * https://github.com/acicuecalo/Robot_mini_tanque
 */
-void setSpeed(int16_t Vtx, int16_t Vty, int16_t Wt) {
-  Vtx = constrain(-Wt, -100, 100);
+void setSpeed(int16_t ax, int16_t Vty, int16_t Wt) {
+  int Vtx = constrain(-Wt, -100, 100);
   Vty = constrain(Vty, -100, 100);
-  //   Wt = constrain(Wt, -100, 100);
+  ax = constrain(ax, -100, 100);
 
   int spdL;
   int spdR;
@@ -72,8 +91,8 @@ void setSpeed(int16_t Vtx, int16_t Vty, int16_t Wt) {
   }
  
   // Mixer
-  spdL = Vty + Vtx;   //motorDelanteroIzquierdo
-  spdR = -Vty + Vtx;  //motorDelanteroDerecho
+  spdL = Vty + Vtx;   //motorL
+  spdR = -Vty + Vtx;  //motorR
 
   // Servo output
   spdL = map(spdL, -100, 100, degreesMinL, degreesMaxL);
@@ -81,24 +100,40 @@ void setSpeed(int16_t Vtx, int16_t Vty, int16_t Wt) {
    
   if (spdL != degreesCenterL) {
     attachServoLeft();
+    if (spdL > degreesCenterL) spdL = spdL + offsetMaxLeft;
+    else spdL = spdL - offsetMinLeft;
     servoLeft.write(spdL);
-  } else {
+    // analogWrite(BUILTINLED, abs(spdL));
+  } else if (servoLeft.attached()) {
+    servoLeft.write(degreesCenterL);
     servoLeft.detach();
   }
 
   if (spdR != degreesCenterR) {
     attachServoRight();
+    if (spdR > degreesCenterR) spdR = spdR + offsetMaxRight;
+    else spdR = spdR - offsetMinRight;
+    // Serial.printf("servo Right write [spdR:%04d spdL:%04d]\r\n", spdR, spdL);
     servoRight.write(spdR);
-  } else {
+    // analogWrite(BUILTINLED, abs(spdR));
+  } else if (servoRight.attached()) {
+    servoRight.write(degreesCenterR);
     servoRight.detach();
   }
+
+  if (ax < -90 && spdL > 50) toggle_lamp();
+  if (ax > 87 && spdL < 45) toggle_camera();
+
   // GUI Variables
   if(lastVty!=0) lastVty = Vty; 
   if(Vty!=0) lastVty = Vty;
-  analogWrite(BUILTINLED, abs(Vty));
   // Debugging
-  if (spdL !=degreesCenterL || spdR != degreesCenterR)
-    Serial.printf("[spdR:%04d spdL:%04d]\r\n", spdR, spdL);
+  // if (spdL !=degreesCenterL || spdR != degreesCenterR) {
+    Serial.printf("[spdR:%04d spdL:%04d ax:%04d]\r\n", spdR, spdL, ax);
+  // }
+  // else {
+    // analogWrite(BUILTINLED, 0);
+  // }
 }
 
 void sendHeartbeat() {
@@ -148,6 +183,7 @@ void setup() {
   showWelcome();
   joystick.setJoystickCallbacks(new MyJoystickCallback());
   tm = joystick.newTelemetryMsg();
+  joystick.devmode = true;
   joystick.init();
   showWelcomeMessage("ESPNow ready");
 
@@ -158,6 +194,7 @@ void setup() {
   ESP32PWM::allocateTimer(3);
   attachServoLeft();
   attachServoRight();
+  peripheralsInit();
   showWelcomeMessage("Servos ready");
   delay(500);
   showWelcomeMessage("== SETUP READY ==");
