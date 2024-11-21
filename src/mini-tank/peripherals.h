@@ -1,7 +1,7 @@
 #ifdef PERIPHERALS_ENABLE
 
-int LED_LAMP_FRONT = 1;
-int CAMERA_ENABLE = 3;
+bool camera_toggle = false;
+bool led_lamp_toggle = false;
 
 uint32_t trigger_led_lamp = 0;
 
