@@ -16,13 +16,8 @@ const int spanLeft = SPAN_LEFT;
 const int offsetMinLeft = OFFSET_MIN_LEFT;
 const int offsetMaxLeft = OFFSET_MAX_LEFT;
 const int degreesCenterL = CENTER_LEFT;
-#ifndef SERVO_INVERTED
 const int degreesMinL = degreesCenterL + spanLeft;
 const int degreesMaxL = degreesCenterL - spanLeft;
-#else
-const int degreesMinL = degreesCenterL - spanLeft;
-const int degreesMaxL = degreesCenterL + spanLeft;
-#endif
 
 const int deathBand = DEATH_BAND;
 
@@ -30,13 +25,8 @@ const int spanRight = SPAN_RIGHT;
 const int offsetMinRight = OFFSET_MIN_RIGHT;
 const int offsetMaxRight = OFFSET_MAX_RIGHT;
 const int degreesCenterR = CENTER_RIGHT;
-#ifndef SERVO_INVERTED
 const int degreesMinR = degreesCenterR + spanRight;
 const int degreesMaxR = degreesCenterR - spanRight;
-#else
-const int degreesMinR = degreesCenterR - spanRight;
-const int degreesMaxR = degreesCenterR + spanRight;
-#endif
 
 bool running, fire;
 uint32_t count = 0;
@@ -59,10 +49,10 @@ void detachServos() {
   servoRight.detach();
 }
 
-void servo_brake(Servo servo) {
+void servo_brake(Servo servo, uint32_t us) {
   #ifdef SERVO_BRAKE
-    for (int i = 0; i < SERVO_BRAKE; i++) servo.write(degreesCenterR + deathBand*3);
-    for (int i = 0; i < SERVO_BRAKE; i++) servo.write(degreesCenterR - deathBand*3);
+    for (int i = 0; i < us; i++) servo.write(degreesCenterR + deathBand*3);
+    for (int i = 0; i < us; i++) servo.write(degreesCenterR - deathBand*3);
   #endif
 }
 
@@ -105,7 +95,7 @@ void setSpeed(int16_t ax, int16_t Vty, int16_t Wt) {
     else spdL = spdL - offsetMinLeft;
     servoLeft.write(spdL);
   } else if (servoLeft.attached()) {
-    servo_brake(servoLeft);
+    servo_brake(servoLeft, 1500);
     servoLeft.detach();
   }
 
@@ -113,10 +103,9 @@ void setSpeed(int16_t ax, int16_t Vty, int16_t Wt) {
     attachServoRight();
     if (spdR > degreesCenterR) spdR = spdR + offsetMaxRight;
     else spdR = spdR - offsetMinRight;
-    // Serial.printf("[spdR:%04d]\r\n", spdR);
     servoRight.write(spdR);
   } else if (servoRight.attached()) {
-    servo_brake(servoRight);
+    servo_brake(servoRight, 2000);
     servoRight.detach();
   }
 
@@ -161,7 +150,7 @@ class MyJoystickCallback : public EspNowJoystickCallbacks {
     }
     if (jm.ck == 0x01) {
       static uint_least32_t speedStamp = 0;
-      if (millis() - speedStamp > 20) {
+      if (millis() - speedStamp > 1) {
         speedStamp = millis();
         setSpeed(jm.ax - 100, jm.ay - 100, jm.az - 100);
         running = true;

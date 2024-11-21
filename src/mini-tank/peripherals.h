@@ -9,10 +9,10 @@ void toggle_lamp(){
   if (trigger_led_lamp++ == 30) {
     led_lamp_toggle = !led_lamp_toggle;
     if (led_lamp_toggle) {
-      digitalWrite(LED_LAMP_FRONT, HIGH);
+      digitalWrite(LED_LAMP_ENABLE, HIGH);
     }
     else
-      digitalWrite(LED_LAMP_FRONT, LOW);
+      digitalWrite(LED_LAMP_ENABLE, LOW);
     trigger_led_lamp = 0;
   }
 }
@@ -32,8 +32,8 @@ void toggle_camera(){
 }
 
 void peripheralsInit(){
-  pinMode(LED_LAMP_FRONT, OUTPUT);
-  digitalWrite(LED_LAMP_FRONT, LOW);
+  pinMode(LED_LAMP_ENABLE, OUTPUT);
+  digitalWrite(LED_LAMP_ENABLE, LOW);
   pinMode(CAMERA_ENABLE, OUTPUT);
   digitalWrite(CAMERA_ENABLE, LOW);
 }
