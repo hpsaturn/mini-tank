@@ -94,7 +94,7 @@ void setSpeed(int16_t ax, int16_t Vty, int16_t Wt) {
     if (spdL > degreesCenterL) spdL = spdL + offsetMaxLeft;
     else spdL = spdL - offsetMinLeft;
     servoLeft.write(spdL);
-  } else if (servoLeft.attached()) {
+  } else if (servoLeft.attached() && abs(spdR) < deathBand ) {
     servo_brake(servoLeft, 1500);
     servoLeft.detach();
   }
@@ -104,7 +104,7 @@ void setSpeed(int16_t ax, int16_t Vty, int16_t Wt) {
     if (spdR > degreesCenterR) spdR = spdR + offsetMaxRight;
     else spdR = spdR - offsetMinRight;
     servoRight.write(spdR);
-  } else if (servoRight.attached()) {
+  } else if (servoRight.attached() && abs(spdL) < deathBand) {
     servo_brake(servoRight, 2000);
     servoRight.detach();
   }
