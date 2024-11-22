@@ -6,7 +6,7 @@ bool led_lamp_toggle = false;
 uint32_t trigger_led_lamp = 0;
 
 void toggle_lamp(){
-  if (trigger_led_lamp++ == 50) {
+  if (trigger_led_lamp++ == 60) {
     led_lamp_toggle = !led_lamp_toggle;
     if (led_lamp_toggle) {
       digitalWrite(LED_LAMP_ENABLE, HIGH);
@@ -21,7 +21,7 @@ void toggle_lamp(){
 uint32_t trigger_camera = 0;
 
 void toggle_camera(){
-  if (trigger_camera++ == 50) {
+  if (trigger_camera++ == 60) {
     camera_toggle = !camera_toggle;
     if (camera_toggle) {
       digitalWrite(CAMERA_ENABLE, HIGH);

@@ -73,6 +73,11 @@ void setSpeed(int16_t ax, int16_t Vty, int16_t Wt) {
   Vty = constrain(Vty, -100, 100);
   ax = constrain(ax, -100, 100);
 
+  // peripherals on/off (camara and led lamp)
+  if (ax < -75 ) toggle_lamp();
+  if (ax > 75 ) toggle_camera();
+  if ( abs(ax) > 75 ) return; // skip servos
+
   int spdL;
   int spdR;
 
@@ -109,15 +114,12 @@ void setSpeed(int16_t ax, int16_t Vty, int16_t Wt) {
     servoRight.detach();
   }
 
-  if (ax < -90 && spdL > 50) toggle_lamp();
-  if (ax > 87 && spdL < 45) toggle_camera();
-
   // GUI Variables
   if(lastVty!=0) lastVty = Vty; 
   if(Vty!=0) lastVty = Vty;
 
   // Debugging
-  if (spdL !=degreesCenterL || spdR != degreesCenterR) {
+  if (spdL !=degreesCenterL || spdR != degreesCenterR || abs(ax) > 30) {
     Serial.printf("[spdR:%04d spdL:%04d ax:%04d]\r\n", spdR, spdL, ax);
     analogWrite(BUILTINLED, (int)map(spdL, degreesMinL, degreesMaxL, 0, 254));
   }
@@ -150,7 +152,7 @@ class MyJoystickCallback : public EspNowJoystickCallbacks {
     }
     if (jm.ck == 0x01) {
       static uint_least32_t speedStamp = 0;
-      if (millis() - speedStamp > 1) {
+      if (millis() - speedStamp > 10) {
         speedStamp = millis();
         setSpeed(jm.ax - 100, jm.ay - 100, jm.az - 100);
         running = true;
