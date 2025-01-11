@@ -49,13 +49,6 @@ void detachServos() {
   servoRight.detach();
 }
 
-void servo_brake(Servo servo, uint32_t us) {
-  #ifdef SERVO_BRAKE
-    for (int i = 0; i < us; i++) servo.write(degreesCenterR + deathBand*3);
-    for (int i = 0; i < us; i++) servo.write(degreesCenterR - deathBand*3);
-  #endif
-}
-
 /**
  * @param Vtx Joystick left stick, X axis (Left/Right)
  * @param Vty Joystick left stick, Y axis (forward/backward)
@@ -81,10 +74,18 @@ void setSpeed(int16_t ax, int16_t Vty, int16_t Wt) {
   int spdL;
   int spdR;
 
-  if (abs(Vtx) < deathBand && abs(Vty) < deathBand) {
-    Vtx = 0;
-    Vty = 0;
+  if (abs(Vtx) < deathBand ) Vtx = 0;
+  if (abs(Vty) < deathBand ) Vty = 0;
+  if (abs(ax)  < deathBand ) ax = 0;
+
+  if (Vtx == 0 && Vty == 0 && ax == 0) {
+    servoLeft.write(degreesCenterL);
+    servoRight.write(degreesCenterR);
+    detachServos();
+    return;
   }
+  
+  // Serial.printf("[Vtx:%04d Vty:%04d ax:%04d]\r\n", Vtx, Vty, ax);
  
   // Mixer
   spdL = Vty + Vtx;   //motorL
@@ -99,8 +100,7 @@ void setSpeed(int16_t ax, int16_t Vty, int16_t Wt) {
     if (spdL > degreesCenterL) spdL = spdL + offsetMaxLeft;
     else spdL = spdL - offsetMinLeft;
     servoLeft.write(spdL);
-  } else if (servoLeft.attached() && abs(spdR) < deathBand ) {
-    servo_brake(servoLeft, 1500);
+  } else if (servoLeft.attached() && abs(spdR) < deathBand) {
     servoLeft.detach();
   }
 
@@ -110,7 +110,6 @@ void setSpeed(int16_t ax, int16_t Vty, int16_t Wt) {
     else spdR = spdR - offsetMinRight;
     servoRight.write(spdR);
   } else if (servoRight.attached() && abs(spdL) < deathBand) {
-    servo_brake(servoRight, 2000);
     servoRight.detach();
   }
 
@@ -119,10 +118,10 @@ void setSpeed(int16_t ax, int16_t Vty, int16_t Wt) {
   if(Vty!=0) lastVty = Vty;
 
   // Debugging
-  if (spdL !=degreesCenterL || spdR != degreesCenterR || abs(ax) > 30) {
-    Serial.printf("[spdR:%04d spdL:%04d ax:%04d]\r\n", spdR, spdL, ax);
-    analogWrite(BUILTINLED, (int)map(spdL, degreesMinL, degreesMaxL, 0, 254));
-  }
+  // if (spdL !=degreesCenterL || spdR != degreesCenterR || abs(ax) > 30) {
+    // Serial.printf("[spdR:%04d spdL:%04d ax:%04d]\r\n", spdR, spdL, ax);
+    // analogWrite(BUILTINLED, (int)map(spdL, degreesMinL, degreesMaxL, 0, 254));
+  // }
 }
 
 void sendHeartbeat() {
