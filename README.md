@@ -1,25 +1,22 @@
 
 ## Mini Tank
 
-ESP32/8266 robot platform using two basic servos.
-
-## Credits
-
-- 3D Print design and original idea from [Francisco Carabaza @acicuecalo](https://sites.google.com/view/robot-mini-tanque/inicio)
-- Icons and graphics from [CanAirIO Project](https://github.com/kike-canaries/canairio_firmware#readme)
-- Base firmware migrated from [AIRobot](https://github.com/hpsaturn/airobot#readme)
+ESP32/8266 robot platform using two basic servos (SG90 & MG995)
 
 ## TODO
 
-- [x] Two Joystick flavors (M5StickC and M5StickCPlus)
-- [x] Basic emoticons handling
+- [x] Unified Joystick, support for M5StickC and M5StickCPlus
+- [x] Basic emoticons handling (SG90 version)
 - [x] ESPNow implementation using the [ESPNow Joystick](https://github.com/hpsaturn/espnow-joystick) library
 - [x] Servo control improvements. Thanks to [@acicuecalo](https://github.com/acicuecalo)
 - [x] Slim version design with MG995 motors
 - [x] XIAO ESP32S3 MG995 version robot with Camera and LED mini lamp
+- [x] Camera streamer via ESPNow using [ESPNowCam Library](https://github.com/hpsaturn/ESPNowCam?tab=readme-ov-file#readme) 
+- [x] Added LED flash lamp with ON/OFF via Joystick
+- [x] Camera ON/OFF via Joystick
+- [x] Unified LED driver, peripherals and servos (All PINs are in the .ini file)
+- [ ] Battery level code migration
 - [ ] OTA update in boot
-- [ ] Battery level
-- [ ] SPI or I2C connection to MaxiPy nano camera ?
 
 ## Wiring
 
@@ -59,3 +56,9 @@ For 3DPrint files, build instructions and components details
 - MG995 servos version [here](https://www.thingiverse.com/thing:5974406)
 
 [![Youtube demo](images/youtube_preview.jpg)](https://youtu.be/I6cGg1o1NR0 "Joystick WiFi using nanopb (protobuff) over a ESP32 caterpillar")
+
+## Credits
+
+- (mini-tank SG90) 3D Print design and original idea from [Francisco Carabaza @acicuecalo](https://sites.google.com/view/robot-mini-tanque/inicio)
+- Icons and graphics from [CanAirIO Project](https://github.com/kike-canaries/canairio_firmware#readme)
+- Base firmware migrated from [AIRobot](https://github.com/hpsaturn/airobot#readme)
