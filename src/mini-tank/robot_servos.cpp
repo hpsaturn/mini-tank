@@ -1,8 +1,8 @@
 #include <EspNowJoystick.hpp>
 #include <ESP32Servo.h>
-#include <analogWrite.h>
 #include "GUI.h"
 #include "peripherals.h"
+#include "led_driver.h"
 
 EspNowJoystick joystick;
 TelemetryMessage tm;
@@ -82,6 +82,7 @@ void setSpeed(int16_t ax, int16_t Vty, int16_t Wt) {
     servoLeft.write(degreesCenterL);
     servoRight.write(degreesCenterR);
     detachServos();
+    led_clear();
     return;
   }
   
@@ -100,7 +101,8 @@ void setSpeed(int16_t ax, int16_t Vty, int16_t Wt) {
     if (spdL > degreesCenterL) spdL = spdL + offsetMaxLeft;
     else spdL = spdL - offsetMinLeft;
     servoLeft.write(spdL);
-  } else if (servoLeft.attached() && abs(spdR) < deathBand) {
+  } else if (servoLeft.attached()) {
+    servoLeft.write(degreesCenterL);
     servoLeft.detach();
   }
 
@@ -109,7 +111,8 @@ void setSpeed(int16_t ax, int16_t Vty, int16_t Wt) {
     if (spdR > degreesCenterR) spdR = spdR + offsetMaxRight;
     else spdR = spdR - offsetMinRight;
     servoRight.write(spdR);
-  } else if (servoRight.attached() && abs(spdL) < deathBand) {
+  } else if (servoRight.attached()) {
+    servoRight.write(degreesCenterR);
     servoRight.detach();
   }
 
@@ -118,10 +121,9 @@ void setSpeed(int16_t ax, int16_t Vty, int16_t Wt) {
   if(Vty!=0) lastVty = Vty;
 
   // Debugging
-  // if (spdL !=degreesCenterL || spdR != degreesCenterR || abs(ax) > 30) {
-    // Serial.printf("[spdR:%04d spdL:%04d ax:%04d]\r\n", spdR, spdL, ax);
-    // analogWrite(BUILTINLED, (int)map(spdL, degreesMinL, degreesMaxL, 0, 254));
-  // }
+  if (spdL > degreesCenterL) led_write((int)map(spdL, CENTER_LEFT, degreesMaxL, 0, 254));
+  if (spdR > degreesCenterR) led_write((int)map(spdR, CENTER_RIGHT, degreesMaxR, 0, 254));
+  Serial.printf("[spdR:%04d spdL:%04d ax:%04d]\r\n", spdR, spdL, ax);
 }
 
 void sendHeartbeat() {
@@ -183,6 +185,8 @@ void setup() {
   attachServoLeft();
   attachServoRight();
   peripheralsInit();
+  led_init();
+  
   showWelcomeMessage("Servos ready");
   delay(500);
   showWelcomeMessage("== SETUP READY ==");
